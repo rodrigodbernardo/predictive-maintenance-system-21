@@ -64,7 +64,7 @@ void sensorStart() {
 }
 
 void wifiStart() {
-  wifiMulti.addAP("FLAVIO_02", "8861854611");
+  wifiMulti.addAP("", ""); //INSIRA AQUI ("NOME DO WIFI", "SENHA")
 
   WiFi.mode(WIFI_STA);
 
