@@ -5,8 +5,6 @@
 #define sda D6
 #define scl D5
 
-
-
 const uint8_t MPU_ADDR = 0x68;
 const uint8_t WHO_AM_I = 0x75;
 const uint8_t PWR_MGMT_1 = 0x6B;
