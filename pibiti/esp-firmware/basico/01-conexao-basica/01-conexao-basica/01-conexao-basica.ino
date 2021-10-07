@@ -24,7 +24,7 @@ void setup() {
   Serial.begin(500000);
   Wire.begin(sda, scl);
   sensorStart();
-  wifiStart();
+  //wifiStart();
   calibrate();
 }
 
@@ -46,7 +46,7 @@ void loop() {
   Serial.print(",GyZ:");
   Serial.println(GyZ_);
   
-  delay(10);
+  delay(500);
 
 }
 
