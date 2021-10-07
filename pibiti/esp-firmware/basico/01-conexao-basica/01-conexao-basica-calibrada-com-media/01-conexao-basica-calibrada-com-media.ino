@@ -62,6 +62,7 @@ void setup() {
 
   delay(3000);
 
+
   mpu.wakeup();
   mpu.setRange();
   mpu.calibrate();
