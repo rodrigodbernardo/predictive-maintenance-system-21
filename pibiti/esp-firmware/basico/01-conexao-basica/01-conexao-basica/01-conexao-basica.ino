@@ -48,7 +48,7 @@ void loop() {
   Serial.print(",GyZ:");
   Serial.println(GyZ_);
   
-  delay(10);
+  delay(500);
 
 }
 
