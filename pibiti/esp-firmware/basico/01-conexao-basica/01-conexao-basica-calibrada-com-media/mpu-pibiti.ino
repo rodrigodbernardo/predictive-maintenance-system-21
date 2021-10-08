@@ -132,7 +132,7 @@ void sensor::print() {
   //
   String names[7] = {"AcX:", ",AcY:", ",AcZ:", ",GyX:", ",GyY:", ",GyZ:", ",Tmp:"};
     
-  for (int axis = 0; axis < 6; axis++) {
+  for (int axis = 0; axis < 3; axis++) {
     Serial.print(names[axis]);
 
     switch (rawFlag) { //essa flag informa se vai ser printado o valor bruto ou convertido
