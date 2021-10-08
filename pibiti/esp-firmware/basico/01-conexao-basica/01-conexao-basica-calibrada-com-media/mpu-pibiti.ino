@@ -78,7 +78,7 @@ void sensor::setRange() {
       range_a = 2 * gravity;
       gravityConst = halfRange / 2; // MUDA O VALOR, EM BITS, REFERENTE À CONSTANTE GRAVITACIONAL, DE ACORDO COM O RANGE ESCOLHID.
       break;
-    case 0b00001000://padrao
+    case 0b00001000://padrao - 
       range_a = 4 * gravity;
       gravityConst = halfRange / 4;//8192;//
       break;
