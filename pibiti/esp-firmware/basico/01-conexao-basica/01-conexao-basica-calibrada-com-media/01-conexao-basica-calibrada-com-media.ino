@@ -1,7 +1,5 @@
 /*
 
-
-
 DESCRIÇÃO:
 
 Apenas mostra o valor dos sensores na serial. Todo o programa é orientado a objetos.
@@ -26,8 +24,8 @@ const uint8_t GYRO_CONFIG = 0x1B;  //REGISTRADOR RESPONSAVEL POR CONFIGURAR A ES
 const uint8_t ACCEL_CONFIG = 0x1C; //REGISTRADOR RESPONSAVEL POR CONFIGURAR A ESCALA DO ACELEROMETRO
 const uint8_t ACCEL_XOUT = 0x3B;
 const uint8_t GYRO_SCALE = 0b00001000; //-> ver documentação para saber a escala de conversao do sensor
+//const uint8_t ACCEL_SCALE = 0b00001000;
 const uint8_t ACCEL_SCALE = 0b00001000;
-
 /***Constantes físicas***/
 const float gravity = 9.7803;       //--> Aceleração gravitacional estimada em Fortaleza
 const float halfRange = 32768;      //--> Metade do range de 16 bits
@@ -61,7 +59,6 @@ void setup() {
   Wire.begin(sda, scl);
 
   delay(3000);
-
 
   mpu.wakeup();
   mpu.setRange();
