@@ -1,7 +1,5 @@
 /*
 
-
-
 DESCRIÇÃO:
 
 Apenas mostra o valor dos sensores na serial. Todo o programa é orientado a objetos.
