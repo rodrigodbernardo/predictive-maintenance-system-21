@@ -59,39 +59,39 @@ void sensor::setRange() {
   // SETA O RANGE A SER UTILIZADO NOS SENSORES
   //
   switch (GYRO_SCALE) { // VERIFICA A ESCALA E SALVA O RANGE DO GIROSCÓPIO
-    case 0b00000000://padrao
+    case 0://padrao
       range_g = 250;
       break;
-    case 0b00001000:
+    case 8:
       range_g = 2 * 250;
       break;
-    case 0b00010000:
+    case 16:
       range_g = 4 * 250;
       break;
-    case 0b00011000:
+    case 24:
       range_g = 8 * 250;
       break;
   }
 
   switch (ACCEL_SCALE) { // VERIFICA A ESCALA, SALVA O RANGE DO GIROSCOPIO E A CONSTANTE GRAVITACIONAL
-    case 0b00000000:
+    case 0:
       range_a = 2 * gravity;
       gravityConst = halfRange / 2; // MUDA O VALOR, EM BITS, REFERENTE À CONSTANTE GRAVITACIONAL, DE ACORDO COM O RANGE ESCOLHID.
       break;
-    case 0b00001000://padrao - 
+    case 8://padrao - 
       range_a = 4 * gravity;
       gravityConst = halfRange / 4;//8192;//
       break;
-    case 0b00010000:
+    case 16:
       range_a = 8 * gravity;
       gravityConst = halfRange / 8;
       break;
-    case 0b00011000:
+    case 24:
       range_a = 16 * gravity;
       gravityConst = halfRange / 16;
       break;
   }
-  Serial.println(gravityConst);
+  //Serial.println(gravityConst);
 }
 
 void sensor::convert() {
@@ -103,7 +103,7 @@ void sensor::convert() {
   for (int axis = 3; axis < 6; axis ++)
     buff_[axis] = mapfloat(buff[axis], -halfRange, halfRange, -range_g, range_g);
 
-  //buff_[0] += gravity;
+  //buff_[0] += gravity; --> nao descomentar
 
   buff_temp_ = (float)buff_temp / 340.00 + 36.53;  // A TEMPERATURA TEM UMA FORMULA DE CONVERSAO DIFERENTE
 }
@@ -119,6 +119,7 @@ void sensor::calibrate() {
     for (int axis = 0; axis < 6; axis++)
       zeros[axis] += buff[axis] / 10;
   }
+
   zeros[0] -= gravityConst; // PARA QUE OS SENSORES DE ACELERAÇÃO SEJAM MAIS PROXIMOS DA REALIDADE, O SENSOR
                             // INDICA COMO ZERO DO EIXO QUE ESTÁ APONTANDO PARA CIMA (ACX, NESSE CASO) UM VALOR QUE É
                             // A MÉDIA OBTIDA ANTERIORMENTE MENOS A CONSTANTE GRAVITACIONAL.
@@ -132,7 +133,7 @@ void sensor::print() {
   //
   String names[7] = {"AcX:", ",AcY:", ",AcZ:", ",GyX:", ",GyY:", ",GyZ:", ",Tmp:"};
     
-  for (int axis = 0; axis < 3; axis++) {
+  for (int axis = 0; axis < 6; axis++) {
     Serial.print(names[axis]);
 
     switch (rawFlag) { //essa flag informa se vai ser printado o valor bruto ou convertido
@@ -146,13 +147,5 @@ void sensor::print() {
     }
 
   }
-  /*
-    Serial.print(names[6]);
-    if (rawFlag)
-    Serial.print(buff_temp_);
-    else
-    Serial.print(buff_temp);
-  */
-
   Serial.println();
 }

@@ -23,9 +23,8 @@ const uint8_t PWR_MGMT_1 = 0x6B;
 const uint8_t GYRO_CONFIG = 0x1B;  //REGISTRADOR RESPONSAVEL POR CONFIGURAR A ESCALA DO GIROSCOPIO
 const uint8_t ACCEL_CONFIG = 0x1C; //REGISTRADOR RESPONSAVEL POR CONFIGURAR A ESCALA DO ACELEROMETRO
 const uint8_t ACCEL_XOUT = 0x3B;
-const uint8_t GYRO_SCALE = 0b00001000; //-> ver documentação para saber a escala de conversao do sensor
-//const uint8_t ACCEL_SCALE = 0b00001000;
-const uint8_t ACCEL_SCALE = 4;
+const uint8_t GYRO_SCALE = 8; //-> ver documentação para saber a escala de conversao do sensor
+const uint8_t ACCEL_SCALE = 16;
 /***Constantes físicas***/
 const float gravity = 9.7803;       //--> Aceleração gravitacional estimada em Fortaleza
 const float halfRange = 32768;      //--> Metade do range de 16 bits
@@ -42,10 +41,9 @@ float   buff_temp_;                 //--> Guarda os ultimos dados do sensor tmp 
 
 int16_t gravityConst;               //--> Especifica quanto equivale a variavel 'gravity' no tipo raw (varia de acordo com o range do acelerometro escolhido); pode ser substituído por uma simples formula, mas eu preferi assim
 
-bool    rawFlag = 0;                //--> Especifica se os dados serao mostrado no tipo RAW ou SI. 1 para SI; 0 para RAW
+bool    rawFlag = 1;                //--> Especifica se os dados serao mostrado no tipo RAW ou SI. 1 para SI; 0 para RAW
 
-float   range_a = 19.5606;
-float range_g;           //--> Guarda o range dos sensores acc e gyr, respectivamente
+float   range_a, range_g;           //--> Guarda o range dos sensores acc e gyr, respectivamente
 
 /**Objetos**/
 
@@ -61,13 +59,13 @@ void setup() {
   delay(3000);
 
   mpu.wakeup();
-  //mpu.setRange();
-  //mpu.calibrate();
+  mpu.setRange();
+  mpu.calibrate();
 }
 
 void loop() {
 
-  mpu.read(1);
+  mpu.read(0);
   mpu.print();
 
   delay(100);
