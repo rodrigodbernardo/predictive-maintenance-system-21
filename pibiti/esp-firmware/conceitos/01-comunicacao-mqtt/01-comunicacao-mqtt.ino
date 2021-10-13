@@ -1,6 +1,6 @@
 #include <ESP8266WiFiMulti.h>
 #include <PubSubClient.h>
-#include <ArduinoJson.h>
+//#include <ArduinoJson.h>
 
 #include "key.h"
 
@@ -8,6 +8,7 @@ using namespace std;
 
 String mensagem_entrada;
 int num = 0;
+int volta = 0;
 
 ESP8266WiFiMulti wifiMulti;
 
@@ -45,8 +46,11 @@ void loop()
         num++;
     else
         num--;
-
-    MQTT.publish(outTopic, num);
+    
+    char num_[2];
+    snprintf(num_, 2,"%i", num);
+    MQTT.publish(topico_teste_saida, num_);
+    Serial.println(num);
     delay(1000);
 }
 
@@ -87,7 +91,7 @@ void setupWiFi(ESP8266WiFiMulti wifiMulti)
     Serial.println(WiFi.localIP());
 }
 
-void inputMQTT(char *topic, byte *payload, unsigned int length)
+void inputMQTT(char *topic, uint8_t *payload, unsigned int length)
 {
 
   for (int i = 0; i < length; i++)
