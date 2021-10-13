@@ -127,3 +127,11 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+###################################
+###################################
+### --- Arquivos do projeto --- ###
+
+
+pibiti/esp-firmware/conceitos/01-comunicacao-mqtt/key.h
+
