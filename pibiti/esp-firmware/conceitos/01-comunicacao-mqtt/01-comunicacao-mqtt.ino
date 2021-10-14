@@ -47,10 +47,10 @@ void loop()
     else
         num--;
     
-    char num_[2];
-    snprintf(num_, 2,"%i", num);
+    char num_[20];
+    snprintf(num_, 20,"%i", millis());
     MQTT.publish(topico_teste_saida, num_);
-    Serial.println(num);
+    //Serial.println(num);
     delay(1000);
 }
 
@@ -93,7 +93,7 @@ void setupWiFi(ESP8266WiFiMulti wifiMulti)
 
 void inputMQTT(char *topic, uint8_t *payload, unsigned int length)
 {
-
+  mensagem_entrada = "";
   for (int i = 0; i < length; i++)
   {
     char c = (char)payload[i];

@@ -16,6 +16,7 @@ void sensor::wakeup() {
   write(GYRO_CONFIG, GYRO_SCALE);   //CONFIGURA A ESCALA DO GIROSCÓPIO - +-250 °/s -->
   write(ACCEL_CONFIG, ACCEL_SCALE); //CONFIGURA A ESCALA DO ACELERÔMETRO - +-4G
 }
+
 void sensor::write(int reg, int val) {
   //
   // COMUNICA-SE COM O SENSOR POR I2C. UTILIZADA POR OUTRAS FUNÇÕES
@@ -25,6 +26,7 @@ void sensor::write(int reg, int val) {
   Wire.write(val);                  // escreve o valor no registro
   Wire.endTransmission();           // termina a transmissão
 }
+
 void sensor::read(int calibFlag) {
   //
   // LÊ AS MEMÓRIAS DO SENSOR. UTILIZADA PARA SABER OS VALORES DE ACELERAÇÃO E GIRO ATUAIS
@@ -51,7 +53,8 @@ void sensor::read(int calibFlag) {
       buff[axis] -= zeros[axis];
   }
 }
-void sensor::setRange() {
+
+void sensor::setRange(const float gravity) {
   //
   // SETA O RANGE A SER UTILIZADO NOS SENSORES
   //
@@ -73,22 +76,22 @@ void sensor::setRange() {
   switch (ACCEL_SCALE) { // VERIFICA A ESCALA, SALVA O RANGE DO GIROSCOPIO E A CONSTANTE GRAVITACIONAL
     case 0:
       range_a = 2 * gravity;
-      gravityConst = halfRange / 2; // MUDA O VALOR, EM BITS, REFERENTE À CONSTANTE GRAVITACIONAL, DE ACORDO COM O RANGE ESCOLHID.
+      gravityRAW = halfRange / 2; // MUDA O VALOR, EM BITS, REFERENTE À CONSTANTE GRAVITACIONAL, DE ACORDO COM O RANGE ESCOLHID.
       break;
     case 8://padrao - 
       range_a = 4 * gravity;
-      gravityConst = halfRange / 4;//8192;//
+      gravityRAW = halfRange / 4;//8192;//
       break;
     case 16:
       range_a = 8 * gravity;
-      gravityConst = halfRange / 8;
+      gravityRAW = halfRange / 8;
       break;
     case 24:
       range_a = 16 * gravity;
-      gravityConst = halfRange / 16;
+      gravityRAW = halfRange / 16;
       break;
   }
-  //Serial.println(gravityConst);
+  //Serial.println(gravityRAW);
 }
 void sensor::convert() {
   //
@@ -115,13 +118,13 @@ void sensor::calibrate() {
       zeros[axis] += buff[axis] / 10;
   }
 
-  zeros[0] -= gravityConst; // PARA QUE OS SENSORES DE ACELERAÇÃO SEJAM MAIS PROXIMOS DA REALIDADE, O SENSOR
+  zeros[0] -= gravityRAW;   // PARA QUE OS SENSORES DE ACELERAÇÃO SEJAM MAIS PROXIMOS DA REALIDADE, O SENSOR
                             // INDICA COMO ZERO DO EIXO QUE ESTÁ APONTANDO PARA CIMA (ACX, NESSE CASO) UM VALOR QUE É
                             // A MÉDIA OBTIDA ANTERIORMENTE MENOS A CONSTANTE GRAVITACIONAL.
                             // ISSO FAZ COM QUE O ZERO DO SENSOR SEJA APROX. O ZERO DA VIDA REAL, E ELE MOSTRA A ACELERAÇÃO DA
                             // GRAVIDADE CORRETAMENTE NO PLOT
 }
-void sensor::print() {
+void sensor::print(bool rawFlag) {
   //
   // PRINTA OS VALORES EM FORMATO COMPATÍVEL COM O MONITOR SERIAL DO ARDUINO
   //
@@ -152,17 +155,18 @@ void sensor::setWifi(ESP8266WiFiMulti wifiMulti) {
   WiFi.mode(WIFI_STA);
 
   while (wifiMulti.run() != WL_CONNECTED) {
-
-    Serial.println("Trying to connect to WiFi.");
+    Serial.println("Tentando conectar à rede Wi-Fi.");
     delay(500);
   }
-  Serial.print("\nWiFi connected. IP ");
+  Serial.print("\nWi-Fi conectada. IP ");
   Serial.println(WiFi.localIP());
 }
+
 void sensor::setMqtt(PubSubClient& MQTT) {
   MQTT.setServer(broker_addr, broker_port);
   //MQTT.setCallback(dataInput);
 }
+
 void sensor::send(PubSubClient& MQTT) {
   /*
   for (int axis = 0; axis < 6; axis++) {
@@ -202,11 +206,11 @@ void sensor::setBroker(PubSubClient& MQTT)//setupMQTT
   //deviceID += String(random(0xffff), HEX);
   deviceID += WiFi.macAddress();
 
-  Serial.println("Trying to connect to MQTT Broker as " + deviceID);
+  Serial.println("Tentando conectar ao broker como " + deviceID);
   if (MQTT.connect(deviceID.c_str()))
   {
-    Serial.println("\nBroker connected!");
-    MQTT.subscribe("rdba/inTopic");
+    Serial.println("\nBroker conectado!");
+    MQTT.subscribe(topico_teste_entrada);
   }
   else
   {

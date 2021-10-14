@@ -29,7 +29,7 @@ const uint8_t ACCEL_XOUT = 0x3B;
 const uint8_t GYRO_SCALE = 8; //-> ver documentação para saber a escala de conversao do sensor
 const uint8_t ACCEL_SCALE = 16;
 /***Constantes físicas***/
-const float gravity = 9.7803;  //--> Aceleração gravitacional estimada em Fortaleza
+//const float gravity = 9.7803;  //--> Aceleração gravitacional estimada em Fortaleza
 const float halfRange = 32768; //--> Metade do range de 16 bits
 
 /**Variaveis**/
@@ -42,9 +42,9 @@ float buff_[6];    //--> Guarda os ultimos dados dos sensores acc e gyr em unida
 int16_t buff_temp; //--> Guarda os ultimos dados do sensor tmp no tipo raw (puro).
 float buff_temp_;  //--> Guarda os ultimos dados do sensor tmp em unidade do SI (ºC).
 
-int16_t gravityConst; //--> Especifica quanto equivale a variavel 'gravity' no tipo raw (varia de acordo com o range do acelerometro escolhido); pode ser substituído por uma simples formula, mas eu preferi assim
+int16_t gravityRAW; //--> Especifica quanto equivale a gravidade em raw (varia de acordo com o range do acelerometro escolhido); pode ser substituído por uma simples formula, mas eu preferi assim
 
-bool rawFlag = 1; //--> Especifica se os dados serao mostrado no tipo RAW ou SI. 1 para SI; 0 para RAW
+//bool rawFlag = 1; //--> Especifica se os dados serao mostrado no tipo RAW ou SI. 1 para SI; 0 para RAW
 
 float range_a, range_g; //--> Guarda o range dos sensores acc e gyr, respectivamente
 
@@ -70,19 +70,17 @@ void setup()
   delay(3000);
 
   mpu.wakeup();
-  mpu.setRange();
+  mpu.setRange(9.7803); // Envia o valor da gravidade no local
   mpu.calibrate();
 }
 
 void loop()
 {
-
   if (!MQTT.connected())
     mpu.setBroker(MQTT);
     
-  
   mpu.read(0);
-  mpu.print();
+  mpu.print(1);
   mpu.send(MQTT);
   
   MQTT.loop();
