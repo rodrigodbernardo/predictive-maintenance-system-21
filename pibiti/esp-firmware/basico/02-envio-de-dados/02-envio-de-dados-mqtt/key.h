@@ -19,6 +19,7 @@ UM ARQUIVO DE CHAVES NO GOOGLE DRIVE, PARA EVITAR CONFUSÃO
 */
 
 
+
 //
 // Chaves relativas à conexão Wi-Fi
 //
