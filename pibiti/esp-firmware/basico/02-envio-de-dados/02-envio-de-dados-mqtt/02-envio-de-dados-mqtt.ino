@@ -58,6 +58,7 @@ WiFiClient wifiClient;
 PubSubClient MQTT(wifiClient);
 StaticJsonDocument<100> data;
 
+
 /**Rotinas**/
 
 void setup()
