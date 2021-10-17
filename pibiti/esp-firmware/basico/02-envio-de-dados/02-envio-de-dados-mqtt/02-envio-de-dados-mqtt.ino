@@ -13,7 +13,7 @@ Envio de dados do sensor através de MQTT
 #include <Wire.h>
 
 #include "mpu-pibiti.h"
-#include "key.h"
+#include "secure.key"
 
 #define sda D6
 #define scl D5
