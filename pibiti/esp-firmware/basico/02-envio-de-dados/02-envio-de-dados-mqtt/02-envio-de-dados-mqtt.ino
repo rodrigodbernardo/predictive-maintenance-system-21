@@ -20,6 +20,7 @@ Envio de dados do sensor através de MQTT
 
 /**Constantes**/
 /***Configuração do sensor***/
+
 const uint8_t MPU_ADDR = 0x68;
 const uint8_t WHO_AM_I = 0x75;
 const uint8_t PWR_MGMT_1 = 0x6B;
@@ -64,6 +65,8 @@ void setup()
   Serial.begin(500000);
   Wire.begin(sda, scl);
 
+  delay(3000);
+  
   mpu.setWifi(wifiMulti);
   mpu.setMqtt(MQTT);
 
@@ -71,18 +74,18 @@ void setup()
 
   mpu.wakeup();
   mpu.setRange(9.7803); // Envia o valor da gravidade no local
-  mpu.calibrate();
+  mpu.calibrate(0);            // Calibra o sensor com base na orientação atual do sistema. Por padrão, considera o eixo X como apontando para cima/baixo
 }
 
 void loop()
 {
-  if (!MQTT.connected())
+  if (!MQTT.connected())      // Conecta ao broker, caso necessario.
     mpu.setBroker(MQTT);
     
-  mpu.read(0);
-  mpu.print(1);
-  mpu.send(MQTT);
+  mpu.read(0);                // Faz uma leitura no sensor. Quando recebe 0 como argumento, realiza um no sensor com base na calibração
+  mpu.print(1);               // Printa a ultima captura na Serial. Caso o argumento seja 0, printa o valor bruto. Se for 1, printa o valor no SI
+  mpu.send(MQTT);             // Envia a ultima captura por MQTT.
   
-  MQTT.loop();
+  MQTT.loop();                // Verifica se alguma mensagem foi recebida via MQTT.
   delay(1000);
 }

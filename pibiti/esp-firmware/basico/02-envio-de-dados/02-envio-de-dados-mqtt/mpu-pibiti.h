@@ -8,11 +8,11 @@ class sensor {
     void send(PubSubClient& MQTT);
     void wakeup();
     void write(int reg, int val);
-    void read(int calibFlag);
+    void read(int offsetFlag);
     void setRange(const float gravity);
     void convert();
-    void calibrate();
-    void print(bool rawFlag);
+    void calibrate(const uint8_t baseAxis);
+    void print(const bool noRawFlag);
     void setBroker(PubSubClient& MQTT);
 };
 

@@ -27,7 +27,7 @@ void sensor::write(int reg, int val) {
   Wire.endTransmission();           // termina a transmissão
 }
 
-void sensor::read(int calibFlag) {
+void sensor::read(int offsetFlag) {
   //
   // LÊ AS MEMÓRIAS DO SENSOR. UTILIZADA PARA SABER OS VALORES DE ACELERAÇÃO E GIRO ATUAIS
   // POR PADRÃO, É CONFIGURADA PARA RECEBER:
@@ -48,7 +48,7 @@ void sensor::read(int calibFlag) {
   for (int i = 3; i < 6; i++) // LÊ OS DADOS DE GYRO
     buff[i]   = Wire.read() << 8 | Wire.read();
 
-  if (calibFlag != 1) { //CALIBRA O ZERO DO SENSOR, SE SOLICITADO PELO USUARIO. A TEMPERATURA NÃO É CALIBRADA
+  if (offsetFlag == 0) { //CALIBRA O ZERO DO SENSOR, SE SOLICITADO PELO USUARIO. A TEMPERATURA NÃO É CALIBRADA
     for (int axis = 0; axis < 6; axis++)
       buff[axis] -= zeros[axis];
   }
@@ -106,7 +106,7 @@ void sensor::convert() {
 
   buff_temp_ = (float)buff_temp / 340.00 + 36.53;  // A TEMPERATURA TEM UMA FORMULA DE CONVERSAO DIFERENTE
 }
-void sensor::calibrate() {
+void sensor::calibrate(const uint8_t baseAxis) {
   //
   // LÊ O SENSOR 10 VEZES PARA OBTER UMA MÉDIA. A MÉDIA É UTILIZADA COMO ZERO.
   // ISSO É NECESSÁRIO POR QUE DOIS SENSORES PODEM APRESENTAR DIFERENÇA DE LEITURA ENTRE SI,
@@ -118,13 +118,14 @@ void sensor::calibrate() {
       zeros[axis] += buff[axis] / 10;
   }
 
-  zeros[0] -= gravityRAW;   // PARA QUE OS SENSORES DE ACELERAÇÃO SEJAM MAIS PROXIMOS DA REALIDADE, O SENSOR
+  zeros[baseAxis] -= gravityRAW;   
+                            // PARA QUE OS SENSORES DE ACELERAÇÃO SEJAM MAIS PROXIMOS DA REALIDADE, O SENSOR
                             // INDICA COMO ZERO DO EIXO QUE ESTÁ APONTANDO PARA CIMA (ACX, NESSE CASO) UM VALOR QUE É
                             // A MÉDIA OBTIDA ANTERIORMENTE MENOS A CONSTANTE GRAVITACIONAL.
                             // ISSO FAZ COM QUE O ZERO DO SENSOR SEJA APROX. O ZERO DA VIDA REAL, E ELE MOSTRA A ACELERAÇÃO DA
                             // GRAVIDADE CORRETAMENTE NO PLOT
 }
-void sensor::print(bool rawFlag) {
+void sensor::print(const bool noRawFlag) {
   //
   // PRINTA OS VALORES EM FORMATO COMPATÍVEL COM O MONITOR SERIAL DO ARDUINO
   //
@@ -133,7 +134,7 @@ void sensor::print(bool rawFlag) {
   for (int axis = 0; axis < 6; axis++) {
     Serial.print(names[axis]);
 
-    switch (rawFlag) { //essa flag informa se vai ser printado o valor bruto ou convertido
+    switch (noRawFlag) { //essa flag informa se vai ser printado o valor bruto ou convertido
       case 0://printa o valor bruto
         Serial.print(buff[axis]);
         break;
@@ -148,18 +149,21 @@ void sensor::print(bool rawFlag) {
 }
 
 void sensor::setWifi(ESP8266WiFiMulti wifiMulti) {
-  for(int i = 0; i == sizeof(ssid);i++){
+  for(int i = 0; i < 1;i++){
     wifiMulti.addAP(ssid[i], password[i]);
   }
-
+//wifiMulti.addAP("familia bernado3", "tarcila123");
   WiFi.mode(WIFI_STA);
 
   while (wifiMulti.run() != WL_CONNECTED) {
     Serial.println("Tentando conectar à rede Wi-Fi.");
+    //Serial.println(ssid[0]);
+    //Serial.println(password[0]);
     delay(500);
   }
   Serial.print("\nWi-Fi conectada. IP ");
   Serial.println(WiFi.localIP());
+  Serial.println(sizeof(*ssid));
 }
 
 void sensor::setMqtt(PubSubClient& MQTT) {

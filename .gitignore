@@ -136,3 +136,4 @@ dmypy.json
 pibiti/esp-firmware/conceitos/01-comunicacao-mqtt/key.h
 pibiti/esp-firmware/basico/02-envio-de-dados/02-envio-de-dados/key.h
 
+pibiti/esp-firmware/basico/02-envio-de-dados/02-envio-de-dados-mqtt/key.h
