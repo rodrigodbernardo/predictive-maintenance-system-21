@@ -153,7 +153,6 @@ void sensor::setWifi(ESP8266WiFiMulti wifiMulti) {
   for(int i = 0; i < 1;i++){
     wifiMulti.addAP(ssid[i], password[i]);
   }
-//wifiMulti.addAP("familia bernado3", "tarcila123");
   WiFi.mode(WIFI_STA);
 
   while (wifiMulti.run() != WL_CONNECTED) {
@@ -167,12 +166,12 @@ void sensor::setWifi(ESP8266WiFiMulti wifiMulti) {
   Serial.println(sizeof(*ssid));
 }
 
-void sensor::setMqtt(PubSubClient& MQTT) {
-  MQTT.setServer(broker_addr, broker_port);
+//void sensor::setMqtt(PubSubClient& MQTT) {
+//  MQTT.setServer(broker_addr, broker_port);
   //MQTT.setCallback(dataInput);
-}
+//}
 
-void sensor::send(PubSubClient& MQTT) {
+void sensor::send(PubSubClient& client) {
   /*
   for (int axis = 0; axis < 6; axis++) {
     //Serial.print(names[axis]);
@@ -200,22 +199,22 @@ void sensor::send(PubSubClient& MQTT) {
   }
   //sprintf(message,"%f",buff_[0]);
   
-  MQTT.publish(topico_teste_saida, message);
-  MQTT.loop();
+  client.publish(topico_teste_saida, message);
+  client.loop();
 }
 
-void sensor::setBroker(PubSubClient& MQTT)//setupMQTT
+void sensor::setBroker(PubSubClient& client)//setupMQTT
 {
 
-  String deviceID = "ESP8266Client-";
+  String deviceID = "ESP8266Client";
   //deviceID += String(random(0xffff), HEX);
   deviceID += WiFi.macAddress();
 
   Serial.println("Tentando conectar ao broker como " + deviceID);
-  if (MQTT.connect(deviceID.c_str()))
+  if (client.connect(deviceID,mqttuser,mqttpass))
   {
     Serial.println("\nBroker conectado!");
-    MQTT.subscribe(topico_teste_entrada);
+    client.subscribe(topico_teste_entrada);
   }
   else
   {

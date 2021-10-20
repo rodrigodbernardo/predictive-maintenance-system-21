@@ -2,7 +2,7 @@
 #include <PubSubClient.h>
 //#include <ArduinoJson.h>
 
-#include "secure.key"
+#include "secure.hpp"
 
 using namespace std;
 

@@ -139,3 +139,4 @@ pibiti/esp-firmware/basico/02-envio-de-dados/02-envio-de-dados/key.h
 pibiti/esp-firmware/basico/02-envio-de-dados/02-envio-de-dados-mqtt/key.h
 pibiti/esp-firmware/basico/02-envio-de-dados/02-envio-de-dados-mqtt/key.h
 *.key
+*.hpp

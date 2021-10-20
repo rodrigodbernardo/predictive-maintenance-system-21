@@ -3,9 +3,9 @@
 
 class sensor {
   public:
-    void setMqtt(PubSubClient& MQTT);
+    //void setMqtt(PubSubClient& client);
     void setWifi(ESP8266WiFiMulti wifiMulti);
-    void send(PubSubClient& MQTT);
+    void send(PubSubClient& client);
     void wakeup();
     void write(int reg, int val);
     void read(int offsetFlag);
@@ -13,7 +13,7 @@ class sensor {
     void convert();
     void calibrate(const uint8_t baseAxis);
     void print(const bool noRawFlag);
-    void setBroker(PubSubClient& MQTT);
+    void setBroker(PubSubClient& client);
 };
 
 #endif

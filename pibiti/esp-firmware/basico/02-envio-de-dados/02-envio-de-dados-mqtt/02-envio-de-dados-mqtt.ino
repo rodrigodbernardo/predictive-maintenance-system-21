@@ -13,7 +13,7 @@ Envio de dados do sensor através de MQTT
 #include <Wire.h>
 
 #include "mpu-pibiti.h"
-#include "secure.key"
+#include "secure.hpp"
 
 #define sda D6
 #define scl D5
@@ -49,13 +49,18 @@ int16_t gravityRAW; //--> Especifica quanto equivale a gravidade em raw (varia d
 
 float range_a, range_g; //--> Guarda o range dos sensores acc e gyr, respectivamente
 
+
+void callback(char* topic, byte* payload, unsigned int length) {
+  // handle message arrived
+}
+
 /**Objetos**/
 
 ESP8266WiFiMulti wifiMulti;
 sensor mpu;
 
 WiFiClient wifiClient;
-PubSubClient MQTT(wifiClient);
+PubSubClient client(broker_addr,broker_port,callback,wifiClient);
 StaticJsonDocument<100> data;
 
 
@@ -69,9 +74,9 @@ void setup()
   delay(3000);
   
   mpu.setWifi(wifiMulti);
-  mpu.setMqtt(MQTT);
+  //mpu.setMqtt(MQTT);
 
-  delay(3000);
+  //delay(3000);
 
   mpu.wakeup();
   mpu.setRange(9.7803); // Envia o valor da gravidade no local
@@ -80,13 +85,13 @@ void setup()
 
 void loop()
 {
-  if (!MQTT.connected())      // Conecta ao broker, caso necessario.
-    mpu.setBroker(MQTT);
+  if (!client.connected())      // Conecta ao broker, caso necessario.
+    mpu.setBroker(client);
     
   mpu.read(0);                // Faz uma leitura no sensor. Quando recebe 0 como argumento, realiza um no sensor com base na calibração
   mpu.print(1);               // Printa a ultima captura na Serial. Caso o argumento seja 0, printa o valor bruto. Se for 1, printa o valor no SI
-  mpu.send(MQTT);             // Envia a ultima captura por MQTT.
+  mpu.send(client);             // Envia a ultima captura por MQTT.
   
-  MQTT.loop();                // Verifica se alguma mensagem foi recebida via MQTT.
+  client.loop();                // Verifica se alguma mensagem foi recebida via MQTT.
   delay(1000);
 }
