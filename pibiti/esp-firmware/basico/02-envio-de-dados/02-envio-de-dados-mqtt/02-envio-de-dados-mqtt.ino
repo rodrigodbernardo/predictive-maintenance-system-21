@@ -78,7 +78,7 @@ void setup()
 
   //delay(3000);
 
-  mpu.wakeup();
+  mpu.wakeUp();
   mpu.setRange(9.7803); // Envia o valor da gravidade no local
   mpu.calibrate(0);            // Calibra o sensor com base na orientação atual do sistema. Por padrão, considera o eixo X como apontando para cima/baixo
 }
