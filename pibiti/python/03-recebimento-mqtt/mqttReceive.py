@@ -10,7 +10,7 @@ def mqttConnect(client, userdata, flags, rc):
     client.subscribe("pibiti-ifce/topico-teste-saida")
 
 def mqttInput(client, userdata, msg):
-    print(msg.topic+" "+str(msg.payload))
+    print(msg.payload)
 
 client = mqtt.Client()
 client.on_message = mqttInput

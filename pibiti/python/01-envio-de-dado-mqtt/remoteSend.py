@@ -11,6 +11,6 @@ num = 0
 
 while 1:
     num += 1
-    client.publish("pibiti-ifce/topico-teste-saida",str(num))
-    print('Publicado: ',num)
+    client.publish("pibiti-ifce/topico-teste-saida",'Hello WOrld')
+    print('Publicado: ','Hello WOrld')
     time.sleep(2)
