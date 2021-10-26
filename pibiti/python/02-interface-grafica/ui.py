@@ -1,5 +1,9 @@
+import time
 import requests
+import threading
 from tkinter import *
+
+
 
 def enviaDados():
     print('Enviando dados...')
@@ -7,6 +11,12 @@ def enviaDados():
     texto = 'Enviando dados...'
 
     status_text['text'] = texto
+
+def rotinaMQTT():
+    while 1:
+        time.sleep(1)
+        print('Recebendo dados MQTT')
+
 
 janelaPrincipal = Tk()
 janelaPrincipal.title('Sistema de manutenção preditiva - PIBIC/PIBITI')
@@ -20,5 +30,8 @@ botCaptura.grid(column=0,row=2, padx=10,pady=10)
 
 status_text = Label(janelaPrincipal, text='')
 status_text.grid(column=0,row=3, padx=10,pady=10)
+
+
+threading.Thread(target=rotinaMQTT).start()
 
 janelaPrincipal.mainloop()
