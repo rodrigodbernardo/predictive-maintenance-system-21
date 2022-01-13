@@ -102,4 +102,15 @@ void inputMQTT(char *topic, uint8_t *payload, unsigned int length)
 
   Serial.println("Input: " + mensagem_entrada);
 
+  switch(mensagem_entrada){
+      case "liga1":
+          digitalWrite(D1, HIGH);
+          break;
+      case "liga2":
+          digitalWrite(D2, HIGH);
+          break;
+   
+          
+  }
+    
 }
