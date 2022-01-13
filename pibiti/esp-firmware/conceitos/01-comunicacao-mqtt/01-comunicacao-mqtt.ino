@@ -48,7 +48,7 @@ void loop()
         num--;
     
     char num_[20];
-    snprintf(num_, 20,"%i", millis());
+    snprintf(num_, 20,"%i", num);
     MQTT.publish(topico_teste_saida, num_);
     //Serial.println(num);
     delay(1000);
