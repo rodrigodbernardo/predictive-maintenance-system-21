@@ -27,7 +27,7 @@ const uint8_t ACCEL_SCALE = 16;    // Escala do acelerômetro
 #define scl D5
 
 const float halfRange = 32768; // Metade do range de 16 bits
-const long interval = 1000;
+const long interval = 100;
 
 /**Variaveis**/
 
