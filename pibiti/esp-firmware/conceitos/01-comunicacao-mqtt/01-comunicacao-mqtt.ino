@@ -48,7 +48,7 @@ void loop()
         num--;
     
     char num_[20];
-    snprintf(num_, 20,"%i", millis());
+    snprintf(num_, 20,"%i", num);
     MQTT.publish(topico_teste_saida, num_);
     //Serial.println(num);
     delay(1000);
@@ -102,4 +102,15 @@ void inputMQTT(char *topic, uint8_t *payload, unsigned int length)
 
   Serial.println("Input: " + mensagem_entrada);
 
+  switch(mensagem_entrada){
+      case "liga1":
+          digitalWrite(D1, HIGH);
+          break;
+      case "liga2":
+          digitalWrite(D2, HIGH);
+          break;
+   
+          
+  }
+    
 }
