@@ -8,6 +8,8 @@
 
 #include "secure.hpp"
 
+String firmware_version = "1.1.0.5";
+
 /*************************** VARIAVEIS ************************************/
 
 char *message;
@@ -45,11 +47,15 @@ const long updateInterval = 20000;
 
 const float localGravity = 9.7803;
 
-    const float halfRange = 32768; // Metade do range de 16 bits
+const float halfRange = 32768; // Metade do range de 16 bits
 const long interval = 100;
 
 #define sda D6
 #define scl D5
+
+/*************************** Pinos E/S                ***************************************/
+
+
 
 /************ OBJETOS ******************/
 
@@ -68,8 +74,6 @@ Adafruit_MQTT_Subscribe onoffbutton = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAM
 
 void setup()
 {
-  pinMode(LED_BUILTIN, OUTPUT);
-
   Serial.begin(500000);
   Wire.begin(sda, scl);
   delay(1000);
@@ -85,37 +89,33 @@ void setup()
 
   mqtt.subscribe(&onoffbutton);
 
-  otaUrl = "http://otadrive.com/deviceapi/update?";
-  otaUrl += "k=" + apiKey;
-  otaUrl += "&v=" + firmware_version;
-  otaUrl += "&s=" + String(CHIPID);
+  otaUrl = "http://otadrive.com/deviceapi/update?k=" + apiKey + "&v=" + firmware_version + "&s=" + String(CHIPID);
 }
 
 void loop()
 {
-  //if (!mqtt.connected())
-    //mqttConnect();
+  if (!mqtt.connected())
+    mqttConnect();
 
   unsigned long currTime = millis();
 
   if (currTime - prevPublTime >= publInterval)
   {
     prevPublTime = currTime;
-/*
-    if (AcX.publish("OK")) {
-      Serial.println("OI");
-    }
-*/
+
+    //if (fullCapture.publish("OK"))
+    //  Serial.println("OI");
+
     sensorRead(0);      // Faz uma leitura no sensor. Quando recebe 0 como argumento, realiza um no sensor com base na calibração
     sensorPrint(0);     // Printa a ultima captura na Serial. Caso o argumento seja 0, printa o valor bruto. Se for 1, printa o valor no SI
     //sensorSend(0);      // Envia a ultima captura por MQTT.
-    
+
   }
 
   if (currTime - prevUpdateTime >= updateInterval)
   {
     prevUpdateTime = currTime;
-    doUpdate();
+    //doUpdate();
 
     digitalWrite(LED_BUILTIN, LOW);
     delay(10);
@@ -131,11 +131,12 @@ void loop()
   */
 
   Adafruit_MQTT_Subscribe *subscription;
-  while ((subscription = mqtt.readSubscription(10)))
+  while ((subscription = mqtt.readSubscription(100)))
   {
     if (subscription == &onoffbutton)
     {
       message = (char *)onoffbutton.lastread;
+      Serial.print("message: ");
       Serial.println(message);
 
       /*  A FAZER - ROTINA DE  RECEBIMENTO DE DADOS
@@ -149,17 +150,14 @@ void mqttConnect()
 {
   Serial.print("Conectando ao servidor MQTT... ");
 
-  retries = 5;
-  while ((mqtt.connect()) != 0)
-  { // connect will return 0 for connected
-    Serial.println("Erro. Nova conexão em 5 segundos...");
-    mqtt.disconnect();
-    delay(5000); // wait 5 seconds
-    retries--;
-
-    if (retries == 0)
+  for (int retry = 5; (retry >= 0 || mqtt.connect() != 0); retry--) {
+    if (retry == 0)
       while (1)
         ;
+
+    Serial.println("Erro. Nova conexão em 5 segundos...");
+    mqtt.disconnect();
+    delay(5000);
   }
   Serial.println("Broker MQTT conectado!");
 }
@@ -170,17 +168,13 @@ void wifiSet(ESP8266WiFiMulti wifiMulti)
 
   wifiMulti.addAP(WLAN_SSID, WLAN_PASS);
 
-  retries = 150;
   Serial.println("Conectando à rede Wi-Fi.");
-  while (wifiMulti.run() != WL_CONNECTED)
-  {
-    Serial.print(".");
-    delay(100);
-
-    retries--;
-    if (retries == 0)
+  for (int retry = 15; (retry >= 0 || wifiMulti.run() != WL_CONNECTED); retry--) {
+    if (retry == 0)
       while (1)
         ;
+    Serial.print(".");
+    delay(1000);
   }
 
   Serial.print("\nWi-Fi conectada. IP ");
@@ -193,12 +187,12 @@ void doUpdate()
 
   switch (ret)
   {
-  case HTTP_UPDATE_FAILED:
-    Serial.println("Falha. Autorize o dispositivo.");
-    break;
-  case HTTP_UPDATE_NO_UPDATES:
-    Serial.println("Nenhuma atualização disponível.");
-    break;
+    case HTTP_UPDATE_FAILED:
+      Serial.println("Falha. Autorize o dispositivo.");
+      break;
+    case HTTP_UPDATE_NO_UPDATES:
+      Serial.println("Nenhuma atualização disponível.");
+      break;
   }
 }
 
@@ -218,38 +212,38 @@ void sensorSetRange(const float gravity)
   // SETA O RANGE A SER UTILIZADO NOS SENSORES
   //
   switch (GYRO_SCALE)
-  {                // VERIFICA A ESCALA E SALVA O RANGE DO GIROSCÓPIO
-  case 0:          //padrao
-    range_g = 250; //+- 250°/s
-    break;
-  case 8:
-    range_g = 2 * 250; //+- 500°/s
-    break;
-  case 16:
-    range_g = 4 * 250; //+- 1000°/s
-    break;
-  case 24:
-    range_g = 8 * 250; //+- 2000°/s
-    break;
+  { // VERIFICA A ESCALA E SALVA O RANGE DO GIROSCÓPIO
+    case 0:          //padrao
+      range_g = 250; //+- 250°/s
+      break;
+    case 8:
+      range_g = 2 * 250; //+- 500°/s
+      break;
+    case 16:
+      range_g = 4 * 250; //+- 1000°/s
+      break;
+    case 24:
+      range_g = 8 * 250; //+- 2000°/s
+      break;
   }
   switch (ACCEL_SCALE)
   { // VERIFICA A ESCALA, SALVA O RANGE DO GIROSCOPIO E A CONSTANTE GRAVITACIONAL
-  case 0:
-    range_a = 2 * gravity;      // +-2g
-    gravityRAW = halfRange / 2; // MUDA O VALOR, EM BITS, REFERENTE À CONSTANTE GRAVITACIONAL, DE ACORDO COM O RANGE ESCOLHID.
-    break;
-  case 8:
-    range_a = 4 * gravity; //padrao - +-4g
-    gravityRAW = halfRange / 4;
-    break;
-  case 16:
-    range_a = 8 * gravity; //+-8g
-    gravityRAW = halfRange / 8;
-    break;
-  case 24:
-    range_a = 16 * gravity; //+-16g
-    gravityRAW = halfRange / 16;
-    break;
+    case 0:
+      range_a = 2 * gravity;      // +-2g
+      gravityRAW = halfRange / 2; // MUDA O VALOR, EM BITS, REFERENTE À CONSTANTE GRAVITACIONAL, DE ACORDO COM O RANGE ESCOLHID.
+      break;
+    case 8:
+      range_a = 4 * gravity; //padrao - +-4g
+      gravityRAW = halfRange / 4;
+      break;
+    case 16:
+      range_a = 8 * gravity; //+-8g
+      gravityRAW = halfRange / 8;
+      break;
+    case 24:
+      range_a = 16 * gravity; //+-16g
+      gravityRAW = halfRange / 16;
+      break;
   }
 }
 
@@ -345,7 +339,7 @@ void sensorSend(bool noRawFlag)
         sprintf(tempMsg, "%f", buff_[axis]);
         break;
     }
-    
+
     strcat(message, tempMsg);
     strcat(message, ";");
   }
