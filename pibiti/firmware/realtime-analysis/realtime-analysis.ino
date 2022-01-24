@@ -8,7 +8,7 @@
 
 #include "secure.hpp"
 
-String firmware_version = "1.1.0.5";
+String firmware_version = "1.1.0.6";
 
 /*************************** VARIAVEIS ************************************/
 
@@ -68,7 +68,9 @@ Adafruit_MQTT_Client mqtt(&wifiClient, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME,
 
 // Notice MQTT paths for AIO follow the form: <username>/feeds/<feedname>
 Adafruit_MQTT_Publish fullCapture = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/AcX");
-Adafruit_MQTT_Subscribe onoffbutton = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/onoff");
+
+Adafruit_MQTT_Subscribe updateButton = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/firmware-update");
+Adafruit_MQTT_Subscribe onoffbutton  = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/onoff");
 
 /*************************** CODIGO ************************************/
 
@@ -88,8 +90,10 @@ void setup()
   sensorCalibrate(0);
 
   mqtt.subscribe(&onoffbutton);
+  mqtt.subscribe(&updateButton);
 
   otaUrl = "http://otadrive.com/deviceapi/update?k=" + apiKey + "&v=" + firmware_version + "&s=" + String(CHIPID);
+  doUpdate();
 }
 
 void loop()
@@ -103,23 +107,10 @@ void loop()
   {
     prevPublTime = currTime;
 
-    //if (fullCapture.publish("OK"))
-    //  Serial.println("OI");
-
     sensorRead(0);      // Faz uma leitura no sensor. Quando recebe 0 como argumento, realiza um no sensor com base na calibração
     sensorPrint(0);     // Printa a ultima captura na Serial. Caso o argumento seja 0, printa o valor bruto. Se for 1, printa o valor no SI
     //sensorSend(0);      // Envia a ultima captura por MQTT.
 
-  }
-
-  if (currTime - prevUpdateTime >= updateInterval)
-  {
-    prevUpdateTime = currTime;
-    //doUpdate();
-
-    digitalWrite(LED_BUILTIN, LOW);
-    delay(10);
-    digitalWrite(LED_BUILTIN, HIGH);
   }
 
   // ping the server to keep the mqtt connection alive
@@ -131,7 +122,7 @@ void loop()
   */
 
   Adafruit_MQTT_Subscribe *subscription;
-  while ((subscription = mqtt.readSubscription(100)))
+  while ((subscription = mqtt.readSubscription(10)))
   {
     if (subscription == &onoffbutton)
     {
@@ -143,6 +134,12 @@ void loop()
 
       */
     }
+    if (subscription == &updateButton) {
+      message = (char *)onoffbutton.lastread;
+      if (strcmp(message, "update") == 0) {
+        doUpdate();
+      }
+    }
   }
 }
 
@@ -150,7 +147,7 @@ void mqttConnect()
 {
   Serial.print("Conectando ao servidor MQTT... ");
 
-  for (int retry = 5; (retry >= 0 || mqtt.connect() != 0); retry--) {
+  for (int retry = 5; (retry >= 0 && mqtt.connect() != 0); retry--) {
     if (retry == 0)
       while (1)
         ;
@@ -169,7 +166,7 @@ void wifiSet(ESP8266WiFiMulti wifiMulti)
   wifiMulti.addAP(WLAN_SSID, WLAN_PASS);
 
   Serial.println("Conectando à rede Wi-Fi.");
-  for (int retry = 15; (retry >= 0 || wifiMulti.run() != WL_CONNECTED); retry--) {
+  for (int retry = 15; (retry >= 0 && wifiMulti.run() != WL_CONNECTED); retry--) {
     if (retry == 0)
       while (1)
         ;
@@ -184,14 +181,14 @@ void wifiSet(ESP8266WiFiMulti wifiMulti)
 void doUpdate()
 {
   t_httpUpdate_return ret = ESPhttpUpdate.update(wifiClientOTA, otaUrl, firmware_version);
-
+  
   switch (ret)
   {
     case HTTP_UPDATE_FAILED:
-      Serial.println("Falha. Autorize o dispositivo.");
+      Serial.println("\nFalha no OTA. Autorize o dispositivo.");
       break;
     case HTTP_UPDATE_NO_UPDATES:
-      Serial.println("Nenhuma atualização disponível.");
+      Serial.println("\nNenhuma atualização OTA disponível.");
       break;
   }
 }
