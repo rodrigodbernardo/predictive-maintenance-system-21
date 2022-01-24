@@ -135,7 +135,8 @@ void loop()
       */
     }
     if (subscription == &updateButton) {
-      message = (char *)onoffbutton.lastread;
+      
+      message = (char *)updateButton.lastread;
       if (strcmp(message, "update") == 0) {
         doUpdate();
       }
@@ -185,10 +186,10 @@ void doUpdate()
   switch (ret)
   {
     case HTTP_UPDATE_FAILED:
-      Serial.println("\nFalha no OTA. Autorize o dispositivo.");
+      Serial.println("\nFalha no OTA. Autorize o dispositivo.\n");
       break;
     case HTTP_UPDATE_NO_UPDATES:
-      Serial.println("\nNenhuma atualização OTA disponível.");
+      Serial.println("\nNenhuma atualização OTA disponível.\n");
       break;
   }
 }
