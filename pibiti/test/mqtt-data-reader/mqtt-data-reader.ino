@@ -102,7 +102,10 @@
 
 
 #include <PubSubClient.h>
-#include <ESP8266WiFi.h>
+
+//#include "Adafruit_MQTT.h"
+//#include "Adafruit_MQTT_Client.h"
+#include <ESP8266WiFiMulti.h>
 #include "secure.hpp"
 
 void callback(char* topic, byte* payload, unsigned int length) {
@@ -115,48 +118,84 @@ void callback(char* topic, byte* payload, unsigned int length) {
   Serial.println();
 }
 
+
 WiFiClient wifiClient;
-PubSubClient client(AIO_SERVER, AIO_SERVERPORT, callback, wifiClient);
+ESP8266WiFiMulti wifiMulti;
+
+//Adafruit_MQTT_Client mqtt(&wifiClient, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO_KEY);
+//
+//Adafruit_MQTT_Publish sendData = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/send");
+//Adafruit_MQTT_Subscribe receiveData = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/receive");
+
+
+char *message;
+
 
 void setup() {
   Serial.begin(500000);
-  setup_wifi();
-  setup_mqtt();
-  client.setServer(AIO_SERVER, 1883);
-  client.setCallback(callback);
+  setup_wifi(wifiMulti);
+  //  setup_mqtt();
+  //  client.setServer(AIO_SERVER, 1883);
+  //  client.setCallback(callback);
+
+  mqtt.subscribe(&receiveData);
+
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
   client.loop();
-//  if (client.connected()) {
-//    client.publish("outTopic", "hello world");
-//    Serial.println("Enviando dado");
-//  } else {
-//    setup_mqtt();
+  //  if (client.connected()) {
+  //    client.publish("outTopic", "hello world");
+  //    Serial.println("Enviando dado");
+  //  } else {
+  //    setup_mqtt();
+  //  }
+
+//  if (!mqtt.connected())
+//    mqttConnect();
+//
+//  Adafruit_MQTT_Subscribe *subscription;
+//  while ((subscription = mqtt.readSubscription(10))) {
+//
+//    if (subscription == &receiveData) {
+//      message = (char *)receiveData.lastread;
+//      Serial.println(message);
+//    }
 //  }
 
   delay(2000);
+  Serial.println("loop");
 }
 
-void setup_wifi() {
+void setup_wifi(ESP8266WiFiMulti wifiMulti) {
 
 
   delay(10);
   // We start by connecting to a WiFi network
   Serial.println();
-  Serial.print("Connecting to ");
-  Serial.println(WLAN_SSID);
+  //  Serial.print("Connecting to ");
+  //  Serial.println(WLAN_SSID);
 
   WiFi.mode(WIFI_STA);
-  WiFi.begin(WLAN_SSID, WLAN_PASS);
-
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
+  //WiFi.begin(WLAN_SSID, WLAN_PASS);
+  for (int i = 0; i < 2; i++) {
+    wifiMulti.addAP(WLAN_SSID[i], WLAN_PASS[i]);
+    Serial.print("Adding network: ");
+    Serial.println(WLAN_SSID[i]);
   }
 
-  randomSeed(micros());
+
+  Serial.print("Connecting");
+  for (int retry = 15; (retry >= 0 && wifiMulti.run() != WL_CONNECTED); retry--) {
+    if (retry == 0)
+      while (1)
+        ;
+    Serial.print(".");
+    delay(1000);
+  }
+
+  //randomSeed(micros());
 
   Serial.println("");
   Serial.println("WiFi connected");
@@ -187,4 +226,38 @@ void setup_mqtt() {
     }
   }
 
+}
+
+//void mqttConnect() {
+//  Serial.print("Conectando ao servidor MQTT... ");
+//
+//  for (int retry = 5; (retry >= 0 && mqtt.connect() != 0); retry--) {
+//    if (retry == 0)
+//      while (1)
+//        ;
+//
+//    Serial.println("Erro. Nova conexão em 5 segundos...");
+//    mqtt.disconnect();
+//    delay(5000);
+//  }
+//  Serial.println("Broker MQTT conectado!");
+//}
+
+void wifiSet(ESP8266WiFiMulti wifiMulti) {
+  WiFi.mode(WIFI_STA);
+
+  for (int i = 0; i < 2; i++) {
+    wifiMulti.addAP(WLAN_SSID[i], WLAN_PASS[i]);
+  }
+  Serial.println("Conectando à rede Wi-Fi.");
+  for (int retry = 15; (retry >= 0 && wifiMulti.run() != WL_CONNECTED); retry--) {
+    if (retry == 0)
+      while (1)
+        ;
+    Serial.print(".");
+    delay(1000);
+  }
+
+  Serial.print("\nWi-Fi conectada. IP ");
+  Serial.println(WiFi.localIP());
 }
