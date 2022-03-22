@@ -1,3 +1,5 @@
+/*Código para envio dos dados via MQTT*/
+
 #include <Arduino.h>
 #include <ESP8266WiFiMulti.h>
 //#include <Wire.h>
