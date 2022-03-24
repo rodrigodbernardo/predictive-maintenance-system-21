@@ -20,12 +20,6 @@
 //#define Version "2.0.0.0"
 //#define MakeFirmwareInfo(k, v) "&_FirmwareInfo&k=" k "&v=" v "&FirmwareInfo_&"
 
-//------------------------------------------------------------------------
-
-void callback(char *topic, byte *payload, unsigned int length)
-{
-  // handle message arrived
-}
 
 //------------------------------------------------------------------------
 
@@ -46,11 +40,16 @@ const uint8_t ACCEL_SCALE = 8;     // Escala do acelerômetro
 int16_t zeros[6];  // Média dos dados da calibração. Utilizados como zero.
 int16_t buff[6];   // Dado atual dos sensores acc e gyr no tipo raw (puro).
 
+int16_t buff_temp; // Dado atual do sensor tmp no tipo raw (puro).
+float buff_[6];    // Dado atual dos sensores acc e gyr em unidade do SI (m/s^2 e grau/s).
+float buff_temp_;  // Dado atual do sensor tmp em unidade do SI (ºC).
+
 //------------------------------------------------------------------------
 //  Variaveis diversas
 
 int16_t gravityRAW;     // Gravidade em raw (varia de acordo com o range do acelerometro escolhido); pode ser substituído por uma simples formula, mas eu preferi assim
-
+int capturesNumber = 10;
+int samplePeriod = 1000;
 
 //------------------------------------------------------------------------
 //  Constantes diversas
@@ -61,6 +60,17 @@ const float halfRange = 32768; // Metade do range de 16 bits
 
 //------------------------------------------------------------------------
 
+Sensor sensor;
+MyESP esp;
+
+void callback(char *topic, byte *payload, unsigned int length)
+{
+  if ((char)payload[0] == 'C') {
+    sensor.read(0,1,capturesNumber, samplePeriod);
+  }
+  // handle message arrived
+}
+
 /*
  * DEFINIÇÕES DE WI-FI
  */
@@ -68,8 +78,6 @@ const float halfRange = 32768; // Metade do range de 16 bits
 WiFiClient wifiClient;
 ESP8266WiFiMulti wifiMulti;
 
-Sensor sensor;
-MyESP esp;
 PubSubClient client(IO_SERVER, IO_SERVERPORT, callback, wifiClient);
 
 /*
@@ -78,6 +86,11 @@ PubSubClient client(IO_SERVER, IO_SERVERPORT, callback, wifiClient);
 
 unsigned long prevCheckTime = 0;
 unsigned long checkInterval = 1000;
+
+//------------------------------------------------------------------------
+
+
+
 
 void setup()
 {

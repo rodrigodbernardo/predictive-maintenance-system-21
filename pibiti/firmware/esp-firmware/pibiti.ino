@@ -1,5 +1,5 @@
 #include <Wire.h>
-#include "sensor.h"
+#include "pibiti.h"
 
 void Sensor::wakeup()
 {
@@ -22,7 +22,36 @@ void Sensor::write(int reg, int val)
   Wire.endTransmission();           // termina a transmissão
 }
 
-void Sensor::calibrate(uint8_t baseAxis) {
+void Sensor::read(bool justPrint, int captures)
+{
+  Wire.beginTransmission(MPU_ADDR);
+  Wire.write(ACCEL_XOUT);
+  Wire.endTransmission(false);
+  Wire.requestFrom(MPU_ADDR, (uint8_t)14);
+
+  if (justPrint) {
+    for (int j = 0; j < 7; j++) //LÊ OS DADOS DE ACC
+      buff[0][j] = Wire.read() << 8 | Wire.read();
+  } else {
+    for ( int i = 0; i < captures; i++) {
+      for (int j = 0; j < 7; i++) //LÊ OS DADOS DE ACC
+        buff[i][j] = Wire.read() << 8 | Wire.read();
+    }
+    Serial.println("ok");
+  }
+
+}
+
+void Sensor::print() {
+
+  for ( int j = 0; j < 7; j++) {
+    Serial.print(names[j]);
+    Serial.print(buff[0][j]);
+  }
+  Serial.println();
+}
+/*
+  void Sensor::calibrate(uint8_t baseAxis) {
   //
   // LÊ O SENSOR 10 VEZES PARA OBTER UMA MÉDIA. A MÉDIA É UTILIZADA COMO ZERO.
   // ISSO É NECESSÁRIO POR QUE DOIS SENSORES PODEM APRESENTAR DIFERENÇA DE LEITURA ENTRE SI,
@@ -46,10 +75,10 @@ void Sensor::calibrate(uint8_t baseAxis) {
   // A MÉDIA OBTIDA ANTERIORMENTE MENOS A CONSTANTE GRAVITACIONAL.
   // ISSO FAZ COM QUE O ZERO DO SENSOR SEJA APROX. O ZERO DA VIDA REAL, E ELE MOSTRA A ACELERAÇÃO DA
   // GRAVIDADE CORRETAMENTE NO PLOT
-}
+  }
 
-void Sensor::read(bool justCalibrating,bool offsetFlag, int capturesNumber, int samplePeriod)
-{
+  void Sensor::read(bool justCalibrating,bool offsetFlag, int capturesNumber, int samplePeriod)
+  {
   //
   // LÊ AS MEMÓRIAS DO SENSOR. UTILIZADA PARA SABER OS VALORES DE ACELERAÇÃO E GIRO ATUAIS
   // POR PADRÃO, É CONFIGURADA PARA RECEBER:
@@ -82,12 +111,12 @@ void Sensor::read(bool justCalibrating,bool offsetFlag, int capturesNumber, int 
         buff[axis] -= zeros[axis];
     }
   }
-}
+  }
 
-//----------------------------------
+  //----------------------------------
 
-void MyESP::setWifi(ESP8266WiFiMulti wifiMulti)
-{
+  void MyESP::setWifi(ESP8266WiFiMulti wifiMulti)
+  {
   WiFi.mode(WIFI_STA);
 
   wifiMulti.addAP(WLAN_SSID, WLAN_PASS);
@@ -104,4 +133,5 @@ void MyESP::setWifi(ESP8266WiFiMulti wifiMulti)
 
   Serial.print("\nWi-Fi conectada. IP ");
   Serial.println(WiFi.localIP());
-}
+  }
+*/
