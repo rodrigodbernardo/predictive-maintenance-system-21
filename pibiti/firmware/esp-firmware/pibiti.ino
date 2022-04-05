@@ -112,7 +112,7 @@ void Sensor::print() {
     }
   }
   }
-
+*/
   //----------------------------------
 
   void MyESP::setWifi(ESP8266WiFiMulti wifiMulti)
@@ -134,4 +134,3 @@ void Sensor::print() {
   Serial.print("\nWi-Fi conectada. IP ");
   Serial.println(WiFi.localIP());
   }
-*/

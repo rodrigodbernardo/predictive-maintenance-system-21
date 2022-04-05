@@ -1,4 +1,7 @@
 #include <Wire.h>
+#include <PubSubClient.h>
+#include <ESP8266WiFiMulti.h>
+
 
 #include "pibiti.h"
 
@@ -22,17 +25,23 @@ unsigned long checkInterval = 100;
 
 const int captures = 10;
 
-int16_t buff[10][7];   // Dado atual dos sensores acc e gyr no tipo raw (puro).
+int16_t buff[captures][7];   // Dado atual dos sensores acc e gyr no tipo raw (puro).
 
 String names[7] = {"AcX:", ",AcY:", ",AcZ:", ",GyX:", ",GyY:", ",GyZ:", ",Tmp:"};
 
-bool justPrint = 1;
-
+bool justPrint = 0;
 
 //-------------------------------------
 
+void callback(char* topic, byte* payload, unsigned int length) {
+  // handle message arrived
+}
+
+//-------------------------------------
+ESP8266WiFiMulti wifiMulti;
+//PubSubClient client(server, 1883, callback, ethClient);
 Sensor mpu;
-//MyESP esp;
+MyESP esp;
 
 //-------------------------------------
 

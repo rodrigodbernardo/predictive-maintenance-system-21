@@ -9,11 +9,11 @@ public:
   void read(bool justPrint, int captures);
   void print();
 };
-/*
+
 class MyESP
 {
 public:
   void setWifi(ESP8266WiFiMulti wifiMulti);
 };
-*/
+
 #endif
