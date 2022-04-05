@@ -52,6 +52,8 @@ void setup() {
 
   mpu.wakeup();
 
+  esp.setWifi(wifiMulti);
+
 }
 
 void loop() {
@@ -61,7 +63,7 @@ void loop() {
   {
     prevCheckTime = currTime;
     mpu.read(justPrint, captures);
-    mpu.print();
+    //mpu.print();
 
   }
 
