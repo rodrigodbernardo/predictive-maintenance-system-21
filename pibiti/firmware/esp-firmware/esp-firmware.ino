@@ -4,6 +4,7 @@
 
 
 #include "pibiti.h"
+#include "secure.hpp"
 
 //-------------------------------------
 
