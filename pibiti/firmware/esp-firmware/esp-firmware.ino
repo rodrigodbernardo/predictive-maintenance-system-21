@@ -30,7 +30,7 @@ int16_t buff[captures][7];   // Dado atual dos sensores acc e gyr no tipo raw (p
 
 String names[7] = {"AcX:", ",AcY:", ",AcZ:", ",GyX:", ",GyY:", ",GyZ:", ",Tmp:"};
 
-bool justPrint = 0;
+bool justPrint = 1;
 
 //-------------------------------------
 
@@ -40,7 +40,10 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
 //-------------------------------------
 ESP8266WiFiMulti wifiMulti;
-//PubSubClient client(server, 1883, callback, ethClient);
+
+WiFiClient espClient;
+PubSubClient mqtt(IO_SERVER, 1883, callback, espClient);
+
 Sensor mpu;
 MyESP esp;
 
@@ -55,6 +58,7 @@ void setup() {
 
   esp.setWifi(wifiMulti);
 
+
 }
 
 void loop() {
@@ -64,8 +68,18 @@ void loop() {
   {
     prevCheckTime = currTime;
     mpu.read(justPrint, captures);
-    //mpu.print();
+    mpu.print();
+    esp.sendData(justPrint);
 
   }
+
+  if (wifiMulti.run() != WL_CONNECTED) {
+    esp.setWifi(wifiMulti);
+  }
+
+    if (!mqtt.connected()) {
+    esp.setMqtt();
+  }
+  mqtt.loop();
 
 }

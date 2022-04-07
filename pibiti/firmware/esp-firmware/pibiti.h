@@ -14,6 +14,8 @@ class MyESP
 {
 public:
   void setWifi(ESP8266WiFiMulti wifiMulti);
+  void setMqtt();
+  void sendData(bool justPrint);
 };
 
 #endif

@@ -122,15 +122,42 @@ void Sensor::print() {
   wifiMulti.addAP(WLAN_SSID, WLAN_PASS);
 
   Serial.println("Conectando à rede Wi-Fi.");
-  for (int retry = 15; (retry >= 0 && wifiMulti.run() != WL_CONNECTED); retry--)
+  for (int retry = 15; (retry >= 0 && wifiMulti.run(1000) != WL_CONNECTED); retry--)
   {
     if (retry == 0)
       while (1)
         ;
     Serial.print(".");
-    delay(1000);
   }
 
   Serial.print("\nWi-Fi conectada. IP ");
   Serial.println(WiFi.localIP());
   }
+
+  void MyESP::setMqtt() {
+  // Loop until we're reconnected
+  while (!mqtt.connected()) {
+    Serial.print("Attempting MQTT connection...");
+    // Create a random client ID
+    String clientId = "ESP8266Client-";
+    clientId += String(random(0xffff), HEX);
+    // Attempt to connect
+    if (mqtt.connect(clientId.c_str(),"cliente","cliente")) {
+      Serial.println("connected");
+      // Once connected, publish an announcement...
+      mqtt.publish(topico_saida, "hello world");
+      // ... and resubscribe
+      mqtt.subscribe(topico_entrada);
+    } else {
+      Serial.print("failed, rc=");
+      Serial.print(mqtt.state());
+      Serial.println(" try again in 5 seconds");
+      // Wait 5 seconds before retrying
+      delay(5000);
+    }
+  }
+}
+
+void MyESP::sendData(bool justPrint){
+  
+}
