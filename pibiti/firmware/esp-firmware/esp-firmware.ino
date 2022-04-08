@@ -38,6 +38,7 @@ bool justPrint = 1;
 
 void callback(char* topic, byte* payload, unsigned int length) {
   // handle message arrived
+  Serial.println("Chegou Mensagem");
 }
 
 //-------------------------------------
