@@ -8,11 +8,11 @@ from paho.mqtt import client as mqtt_client
 
 broker = '127.0.0.1'
 port = 1883
-topic = "python/mqtt"
+topic = "/feeds/entrada"
 # generate client ID with pub prefix randomly
 client_id = f'python-mqtt-{random.randint(0, 1000)}'
-username = 'emqx'
-password = 'public'
+username = 'cliente'
+password = 'cliente'
 
 def connect_mqtt():
     def on_connect(client, userdata, flags, rc):
