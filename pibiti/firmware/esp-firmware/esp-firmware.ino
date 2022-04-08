@@ -25,6 +25,7 @@ unsigned long checkInterval = 100;
 
 
 
+
 const int captures = 10;
 
 int16_t buff[captures][7];   // Dado atual dos sensores acc e gyr no tipo raw (puro).
