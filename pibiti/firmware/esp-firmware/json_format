@@ -1,0 +1,5 @@
+{
+    "command":"live",
+    "sample_period":100,
+    "n_packets": 5
+}

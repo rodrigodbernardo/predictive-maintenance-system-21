@@ -1,6 +1,7 @@
 #include <Wire.h>
 #include <PubSubClient.h>
 #include <ESP8266WiFiMulti.h>
+#include <ArduinoJson.h>
 
 
 #include "pibiti.h"
@@ -23,7 +24,7 @@ const uint8_t ACCEL_SCALE = 8;     // Escala do acelerômetro
 unsigned long prevCheckTime = 0;
 unsigned long checkInterval = 100;
 
-
+unsigned long currTime;
 
 
 const int captures = 10;
@@ -36,9 +37,23 @@ bool justPrint = 1;
 
 //-------------------------------------
 
+
+String command = "";
+int n_packets, sample_period;
+
+//-------------------------------------
+
 void callback(char* topic, byte* payload, unsigned int length) {
   // handle message arrived
   Serial.println("Chegou Mensagem");
+
+  StaticJsonDocument<256> doc;
+  deserializeJson(doc, payload, length);
+
+  command = (String)doc["command"];
+  n_packets = doc["n_packets"];
+  sample_period = doc["sample_period"];
+
 }
 
 //-------------------------------------
@@ -65,22 +80,50 @@ void setup() {
 }
 
 void loop() {
-  unsigned long currTime = millis();
 
-  if ((currTime - prevCheckTime >= checkInterval) && justPrint == 1)
-  {
+  if (command == "fast_capture") {
+    prevCheckTime = millis();
+
+    for (int i = 0; i < n_packets; i++) {
+      currTime = millis();
+
+      mqtt.loop();
+
+      if ((curTime - prevCheckTime >= sample_period)) {
+        prevCheckTime = currTime;
+
+        mpu.read(0, captures);
+        esp.sendData(justPrint);
+      }
+    }
+    command = "stand-by";
+  }
+
+  while (command == "live_capture") {
+    mqtt.loop();
+
+    prevCheckTime = millis();
+    if ((currTime - prevCheckTime >= sample_period)) {
+      prevCheckTime = currTime;
+
+      mpu.read(justPrint, captures);
+      mpu.print();
+    }
+  }
+
+  currTime = millis();
+  if ((currTime - prevCheckTime >= checkInterval) && justPrint == 1) {
     prevCheckTime = currTime;
     mpu.read(justPrint, captures);
     mpu.print();
     esp.sendData(justPrint);
-
   }
 
   if (wifiMulti.run() != WL_CONNECTED) {
     esp.setWifi(wifiMulti);
   }
 
-    if (!mqtt.connected()) {
+  if (!mqtt.connected()) {
     esp.setMqtt();
   }
   mqtt.loop();
