@@ -3,3 +3,6 @@
     "sample_period":100,
     "n_packets": 5
 }
+
+
+"{\"command\":\"live_capture\",\"sample_period\":1000,\"n_packets\":0}"

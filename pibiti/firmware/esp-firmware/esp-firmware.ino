@@ -85,8 +85,8 @@ void loop() {
     prevCheckTime = millis();
 
     for (int i = 0; i < n_packets; i++) {
+      
       currTime = millis();
-
       mqtt.loop();
 
       if ((curTime - prevCheckTime >= sample_period)) {
@@ -99,10 +99,12 @@ void loop() {
     command = "stand-by";
   }
 
+  prevCheckTime = millis();
   while (command == "live_capture") {
-    mqtt.loop();
 
-    prevCheckTime = millis();
+    currTime = millis();
+    mqtt.loop();
+    
     if ((currTime - prevCheckTime >= sample_period)) {
       prevCheckTime = currTime;
 
