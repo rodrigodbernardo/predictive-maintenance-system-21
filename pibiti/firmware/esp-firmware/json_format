@@ -5,4 +5,4 @@
 }
 
 
-"{\"command\":\"live_capture\",\"sample_period\":1000,\"n_packets\":0}"
+{"command":"live_capture","sample_period":1000,"n_packets":0}
