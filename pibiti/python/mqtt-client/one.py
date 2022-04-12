@@ -23,7 +23,7 @@ def mqttConnect(client, userdata, flags, rc):
     client.subscribe("/feeds/entrada")
 
 def mqttInput(client, userdata, msg):
-    print(msg.payload)
+    msg.payload = msg.payload.decode("utf-8")  ### <--- ATENCAO PARA DECODIFICAR EM UTF-8
 
     if(msg.payload == "end of transmission"):
         print('fim da transmissao')
