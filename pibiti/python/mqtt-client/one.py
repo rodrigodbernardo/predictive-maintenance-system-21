@@ -6,7 +6,7 @@ import paho.mqtt.client as mqtt
 import time
 
 
-broker_addr = '10.106.1.32'
+broker_addr = '127.0.0.1'
 broker_port = 1883
 
 username = 'cliente'
@@ -22,10 +22,10 @@ dados_dict = eval(dados)
 def mqttConnect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
 
-    client.subscribe("/feeds/entrada")
+    client.subscribe("/feeds/saida")
 
 def mqttInput(client, userdata, msg):
-    text_file = open("C:/Users/lari/data.txt", "a")
+    text_file = open("C:/Users/rodri/data.txt", "a")
     msg.payload = msg.payload.decode("utf-8")  ### <--- ATENCAO PARA DECODIFICAR EM UTF-8
     text_file.write(msg.payload + "\n")
     print('valor adicionado')

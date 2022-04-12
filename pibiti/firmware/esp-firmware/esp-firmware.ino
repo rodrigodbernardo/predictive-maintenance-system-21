@@ -119,6 +119,7 @@ void loop() {
 
       mpu.read(justPrint, captures);
       esp.print();
+      esp.sendData(justPrint);
     }
   }
 

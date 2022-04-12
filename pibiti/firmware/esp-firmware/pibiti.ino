@@ -188,13 +188,14 @@ void MyESP::setMqtt() {
 
 void MyESP::sendData(bool justPrint) {
   String output_msg = "";
+  /*
   for (int i = 0; i < captures; i++) {
 
     output_msg += "{";
 
     for (int j = 0; j < 7; j++) {
-      output_msg += names[j];
-      output_msg += buff[i][j];
+      //output_msg += names[j];
+      output_msg += buff[0][j];
     }
 
     output_msg += "}";
@@ -202,5 +203,14 @@ void MyESP::sendData(bool justPrint) {
     
   }
   Serial.println(output_msg);
+  mqtt.publish(topico_saida, output_msg.c_str());
+  */
+
+  
+  for ( int j = 0; j < 7; j++) {
+    output_msg += names[j];
+    output_msg += buff[0][j];
+  }
+
   mqtt.publish(topico_saida, output_msg.c_str());
 }
