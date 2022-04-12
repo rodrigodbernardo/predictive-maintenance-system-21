@@ -141,6 +141,10 @@ void MyESP::setWifi(ESP8266WiFiMulti wifiMulti)
 {
   WiFi.mode(WIFI_STA);
 
+  //int network_count = sizeof(*WLAN_SSID);
+  //Serial.printf("Foram adicionadas %i redes",network_count);
+  
+  //for( int i = 0; i < 2; i++)
   wifiMulti.addAP(WLAN_SSID, WLAN_PASS);
 
   Serial.println("Conectando à rede Wi-Fi.");
@@ -151,6 +155,8 @@ void MyESP::setWifi(ESP8266WiFiMulti wifiMulti)
         ;
     Serial.print(".");
   }
+
+  //Serial.printf("Foram adicionadas %i redes",network_count);
 
   Serial.print("\nWi-Fi conectada. IP ");
   Serial.println(WiFi.localIP());
@@ -193,6 +199,8 @@ void MyESP::sendData(bool justPrint) {
 
     output_msg += "}";
     Serial.printf("Captura %i\n", i);
+    
   }
   Serial.println(output_msg);
+  mqtt.publish(topico_saida, output_msg.c_str());
 }
