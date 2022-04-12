@@ -24,25 +24,47 @@ void Sensor::write(int reg, int val)
 
 void Sensor::read(bool justPrint, int captures)
 {
-  Wire.beginTransmission(MPU_ADDR);
-  Wire.write(ACCEL_XOUT);
-  Wire.endTransmission(false);
-  Wire.requestFrom(MPU_ADDR, (uint8_t)14);
-
   if (justPrint) {
+    Wire.beginTransmission(MPU_ADDR);
+    Wire.write(ACCEL_XOUT);
+    Wire.endTransmission(false);
+    Wire.requestFrom(MPU_ADDR, (uint8_t)14);
+
     for (int j = 0; j < 7; j++) //LÊ OS DADOS DE ACC
       buff[0][j] = Wire.read() << 8 | Wire.read();
   } else {
+
+    prevCheckTime = millis();
+    Serial.println("Iniciando captura");
     for ( int i = 0; i < captures; i++) {
-      for (int j = 0; j < 7; i++) //LÊ OS DADOS DE ACC
-        buff[i][j] = Wire.read() << 8 | Wire.read();
+      capture_done = 0;
+     //Serial.printf("Captura %i", i);
+     
+      while (capture_done == 0) {
+        currTime = millis();
+        
+        if ((currTime - prevCheckTime >= sample_period)) {
+          prevCheckTime = currTime;
+          
+          Wire.beginTransmission(MPU_ADDR);
+          Wire.write(ACCEL_XOUT);
+          Wire.endTransmission(false);
+          Wire.requestFrom(MPU_ADDR, (uint8_t)14);
+
+          for (int j = 0; j < 7; j++) //LÊ OS DADOS DE ACC
+            buff[i][j] = Wire.read() << 8 | Wire.read();
+
+          capture_done = 1;
+        }
+      }
     }
+
     Serial.println("ok");
   }
 
 }
 
-void Sensor::print() {
+void MyESP::print() {
 
   for ( int j = 0; j < 7; j++) {
     Serial.print(names[j]);
@@ -113,10 +135,10 @@ void Sensor::print() {
   }
   }
 */
-  //----------------------------------
+//----------------------------------
 
-  void MyESP::setWifi(ESP8266WiFiMulti wifiMulti)
-  {
+void MyESP::setWifi(ESP8266WiFiMulti wifiMulti)
+{
   WiFi.mode(WIFI_STA);
 
   wifiMulti.addAP(WLAN_SSID, WLAN_PASS);
@@ -132,9 +154,9 @@ void Sensor::print() {
 
   Serial.print("\nWi-Fi conectada. IP ");
   Serial.println(WiFi.localIP());
-  }
+}
 
-  void MyESP::setMqtt() {
+void MyESP::setMqtt() {
   // Loop until we're reconnected
   while (!mqtt.connected()) {
     Serial.print("Attempting MQTT connection...");
@@ -142,7 +164,7 @@ void Sensor::print() {
     String clientId = "ESP8266Client-";
     clientId += String(random(0xffff), HEX);
     // Attempt to connect
-    if (mqtt.connect(clientId.c_str(),"cliente","cliente")) {
+    if (mqtt.connect(clientId.c_str(), "cliente", "cliente")) {
       Serial.println("connected");
       // Once connected, publish an announcement...
       mqtt.publish(topico_saida, "hello world");
@@ -158,6 +180,19 @@ void Sensor::print() {
   }
 }
 
-void MyESP::sendData(bool justPrint){
-  
+void MyESP::sendData(bool justPrint) {
+  String output_msg = "";
+  for (int i = 0; i < captures; i++) {
+
+    output_msg += "{";
+
+    for (int j = 0; j < 7; j++) {
+      output_msg += names[j];
+      output_msg += buff[i][j];
+    }
+
+    output_msg += "}";
+    Serial.printf("Captura %i\n", i);
+  }
+  Serial.println(output_msg);
 }

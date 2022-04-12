@@ -31,9 +31,10 @@ const int captures = 10;
 
 int16_t buff[captures][7];   // Dado atual dos sensores acc e gyr no tipo raw (puro).
 
-String names[7] = {"AcX:", ",AcY:", ",AcZ:", ",GyX:", ",GyY:", ",GyZ:", ",Tmp:"};
+String names[7] = {"\"AcX\":", ",\"AcY\":", ",\"AcZ\":", ",\"GyX\":", ",\"GyY\":", ",\"GyZ\":", ",\"Tmp\":"};
 
 bool justPrint = 1;
+bool capture_done;
 
 //-------------------------------------
 
@@ -48,11 +49,15 @@ void callback(char* topic, byte* payload, unsigned int length) {
   Serial.println("Chegou Mensagem");
 
   StaticJsonDocument<256> doc;
-  deserializeJson(doc, payload, length);
+  deserializeJson(doc, payload);
 
   command = (String)doc["command"];
   n_packets = doc["n_packets"];
   sample_period = doc["sample_period"];
+
+  Serial.println(command);
+  Serial.println(n_packets);
+  Serial.println(sample_period);
 
 }
 
@@ -85,16 +90,20 @@ void loop() {
     prevCheckTime = millis();
 
     for (int i = 0; i < n_packets; i++) {
-      
-      currTime = millis();
+
       mqtt.loop();
 
-      if ((curTime - prevCheckTime >= sample_period)) {
-        prevCheckTime = currTime;
 
-        mpu.read(0, captures);
-        esp.sendData(justPrint);
-      }
+      Serial.println("Entrou");
+
+
+      mpu.read(0, captures);
+      Serial.println("Captura ok");
+      esp.sendData(justPrint);
+      Serial.println("Envio ok");
+
+
+
     }
     command = "stand-by";
   }
@@ -104,21 +113,13 @@ void loop() {
 
     currTime = millis();
     mqtt.loop();
-    
+
     if ((currTime - prevCheckTime >= sample_period)) {
       prevCheckTime = currTime;
 
       mpu.read(justPrint, captures);
-      mpu.print();
+      esp.print();
     }
-  }
-
-  currTime = millis();
-  if ((currTime - prevCheckTime >= checkInterval) && justPrint == 1) {
-    prevCheckTime = currTime;
-    mpu.read(justPrint, captures);
-    mpu.print();
-    esp.sendData(justPrint);
   }
 
   if (wifiMulti.run() != WL_CONNECTED) {

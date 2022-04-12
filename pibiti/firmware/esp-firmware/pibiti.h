@@ -3,19 +3,20 @@
 
 class Sensor
 {
-public:
-  void wakeup();
-  void write(int reg, int val);
-  void read(bool justPrint, int captures);
-  void print();
+  public:
+    void wakeup();
+    void write(int reg, int val);
+    void read(bool justPrint, int captures);
+
 };
 
 class MyESP
 {
-public:
-  void setWifi(ESP8266WiFiMulti wifiMulti);
-  void setMqtt();
-  void sendData(bool justPrint);
+  public:
+    void setWifi(ESP8266WiFiMulti wifiMulti);
+    void setMqtt();
+    void sendData(bool justPrint);
+    void print();
 };
 
 #endif
