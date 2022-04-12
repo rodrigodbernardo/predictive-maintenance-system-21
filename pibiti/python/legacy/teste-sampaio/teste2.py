@@ -1,4 +1,4 @@
-json = "{\"command\":\"live_capture\",\"sample_period\":1000,\"n_packets\":0}"
+json = "{\"AcX\":1000,\"AcY\":1000,\"AcZ\":1000,\"GyX\":1000,\"GyY\":1000,\"GyZ\":1000,\"Tmp\":1000}"
 
 
 res = eval(json)
