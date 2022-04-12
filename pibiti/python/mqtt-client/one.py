@@ -17,14 +17,20 @@ dados = "{\"AcX\":1000,\"AcY\":1000,\"AcZ\":1000,\"GyX\":1000,\"GyY\":1000,\"GyZ
 
 dados_dict = eval(dados)
 
+
+
 def mqttConnect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
 
     client.subscribe("/feeds/entrada")
 
 def mqttInput(client, userdata, msg):
+    text_file = open("C:/Users/lari/data.txt", "a")
     msg.payload = msg.payload.decode("utf-8")  ### <--- ATENCAO PARA DECODIFICAR EM UTF-8
-
+    text_file.write(msg.payload + "\n")
+    print('valor adicionado')
+    text_file.close()
+'''
     if(msg.payload == "end of transmission"):
         print('fim da transmissao')
         print(matrix)
@@ -34,7 +40,7 @@ def mqttInput(client, userdata, msg):
         matrix[-1] = matrix[-1][2:-1]
         print('valor adicionado')
         print(matrix)
-
+'''
 client = mqtt.Client()
 client.on_message = mqttInput
 client.on_connect = mqttConnect
