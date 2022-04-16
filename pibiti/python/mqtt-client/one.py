@@ -24,12 +24,17 @@ def mqttConnect(client, userdata, flags, rc):
 
     client.subscribe("/feeds/saida")
 
+    client.publish("/feeds/entrada", "{\"cmd\":2,\"npk\":0,\"ncp\":100,\"spe\":100000}")
+
 def mqttInput(client, userdata, msg):
     text_file = open("C:/Users/rodri/data.txt", "a")
     msg.payload = msg.payload.decode("utf-8")  ### <--- ATENCAO PARA DECODIFICAR EM UTF-8
     text_file.write(msg.payload + "\n")
     print('valor adicionado')
     text_file.close()
+
+    if(msg.payload == 'fim'):
+        print('fim')
 '''
     if(msg.payload == "end of transmission"):
         print('fim da transmissao')
@@ -46,6 +51,11 @@ client.on_message = mqttInput
 client.on_connect = mqttConnect
 client.username_pw_set(username, password)
 
-client.connect(broker_addr, broker_port)
+
+
+if(client.connect(broker_addr, broker_port)):
+    print('Broker conectado!')
+
+
 
 client.loop_forever()

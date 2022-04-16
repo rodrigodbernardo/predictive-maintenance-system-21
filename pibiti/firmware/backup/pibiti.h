@@ -16,7 +16,8 @@ class MyESP
     void setWifi(ESP8266WiFiMulti wifiMulti);
     void setMqtt();
     void sendData();
-    void print();
+    void sendStoredData();
+    //void print();
 };
 
 #endif

@@ -29,12 +29,12 @@ void Sensor::read()
   Wire.endTransmission(false);
   Wire.requestFrom(MPU_ADDR, (uint8_t)14);
 
-  for (int axis = 0; axis < 7; j++) // LÊ OS DADOS DE ACC
+  for (int axis = 0; axis < 7; axis++) // LÊ OS DADOS DE ACC
     buffer[axis] = Wire.read() << 8 | Wire.read();
 
   /*
-  if (justPrint)
-  {
+    if (justPrint)
+    {
     Wire.beginTransmission(MPU_ADDR);
     Wire.write(ACCEL_XOUT);
     Wire.endTransmission(false);
@@ -42,9 +42,9 @@ void Sensor::read()
 
     for (int j = 0; j < 7; j++) // LÊ OS DADOS DE ACC
       buff[0][j] = Wire.read() << 8 | Wire.read();
-  }
-  else
-  {
+    }
+    else
+    {
 
     prevCheckTime = millis();
     Serial.println("Iniciando captura");
@@ -75,20 +75,20 @@ void Sensor::read()
     }
 
     Serial.println("ok");
-  }
+    }
   */
 }
-
-void MyESP::print()
-{
+/*
+  void MyESP::print()
+  {
   for (int j = 0; j < 7; j++)
   {
     Serial.print(names[j]);
     Serial.print(buffer[j]);
   }
   Serial.println();
-}
-
+  }
+*/
 /*
   void Sensor::calibrate(uint8_t baseAxis) {
   //
@@ -164,19 +164,19 @@ void MyESP::setWifi(ESP8266WiFiMulti wifiMulti)
   // for( int i = 0; i < 2; i++)
   wifiMulti.addAP(WLAN_SSID, WLAN_PASS);
 
-  Serial.println("Conectando à rede Wi-Fi.");
+  //Serial.println("Conectando à rede Wi-Fi.");
   for (int retry = 15; (retry >= 0 && wifiMulti.run(1000) != WL_CONNECTED); retry--)
   {
     if (retry == 0)
       while (1)
         ;
-    Serial.print(".");
+    //Serial.print(".");
   }
 
   // Serial.printf("Foram adicionadas %i redes",network_count);
 
-  Serial.print("\nWi-Fi conectada. IP ");
-  Serial.println(WiFi.localIP());
+  //Serial.print("\nWi-Fi conectada. IP ");
+  //Serial.println(WiFi.localIP());
 }
 
 void MyESP::setMqtt()
@@ -184,24 +184,24 @@ void MyESP::setMqtt()
   // Loop until we're reconnected
   while (!mqtt.connected())
   {
-    Serial.print("Attempting MQTT connection...");
+    //Serial.print("Attempting MQTT connection...");
     // Create a random client ID
     String clientId = "ESP8266Client-";
     clientId += String(random(0xffff), HEX);
     // Attempt to connect
     if (mqtt.connect(clientId.c_str(), "cliente", "cliente"))
     {
-      Serial.println("connected");
+      //Serial.println("connected");
       // Once connected, publish an announcement...
-      mqtt.publish(topico_saida, "hello world");
+      //mqtt.publish(topico_saida, "hello world");
       // ... and resubscribe
       mqtt.subscribe(topico_entrada);
     }
     else
     {
-      Serial.print("failed, rc=");
-      Serial.print(mqtt.state());
-      Serial.println(" try again in 5 seconds");
+      //Serial.print("failed, rc=");
+      //Serial.print(mqtt.state());
+      //Serial.println(" try again in 5 seconds");
       // Wait 5 seconds before retrying
       delay(5000);
     }
@@ -212,7 +212,7 @@ void MyESP::sendData()
 {
   String out_msg = "";
   /*
-  for (int i = 0; i < captures; i++) {
+    for (int i = 0; i < captures; i++) {
 
     output_msg += "{";
 
@@ -224,9 +224,9 @@ void MyESP::sendData()
     output_msg += "}";
     Serial.printf("Captura %i\n", i);
 
-  }
-  Serial.println(output_msg);
-  mqtt.publish(topico_saida, output_msg.c_str());
+    }
+    Serial.println(output_msg);
+    mqtt.publish(topico_saida, output_msg.c_str());
   */
 
   for (int j = 0; j < 7; j++)
@@ -236,4 +236,18 @@ void MyESP::sendData()
   }
 
   mqtt.publish(topico_saida, out_msg.c_str());
+}
+
+void MyESP::sendStoredData()
+{
+  String out_msg = "";
+
+  for (int i = 0; i < 3000; i++) {
+    for (int j = 0; j < 7; j++)
+    {
+          out_msg += names[j];
+          out_msg += v_data[i][j];
+    }
+    mqtt.publish(topico_saida, out_msg.c_str());
+  }  
 }
