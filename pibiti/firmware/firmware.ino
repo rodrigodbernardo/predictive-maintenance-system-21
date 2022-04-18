@@ -41,7 +41,7 @@ int n_packets, command;
 long n_captures = 0;
 long capt_counter = 0;
 String status;
-
+bool waitFlag = 1;
 //-------------------------------------
 
 void callback(char *topic, byte *payload, unsigned int length)
@@ -49,7 +49,10 @@ void callback(char *topic, byte *payload, unsigned int length)
   StaticJsonDocument<256> mqtt_input;
   deserializeJson(mqtt_input, payload);
 
+  Serial.println("Mensagem recebida");
   command = mqtt_input["cmd"];
+
+
   n_packets = mqtt_input["npk"];
   n_captures = mqtt_input["ncp"];
   sample_period = mqtt_input["spe"];
@@ -111,6 +114,15 @@ void loop()
       {
         for (int packet = 0; packet < n_packets; packet++)
         {
+          /*
+          while (waitFlag == 1)
+          {
+            mqtt.loop();
+            delay(500);
+            Serial.println("Aguardando inicio");
+          }
+          */
+
           int interval = 0;
           prevCheckTime = micros();
           unsigned long long packet_begin = micros();
@@ -141,8 +153,7 @@ void loop()
           Serial.println((packet_end - packet_begin));
 
           capt_counter = 0;
-
-          delay(2000);
+          //waitFlag = 1;
         }
         command = -1;
 
@@ -151,27 +162,27 @@ void loop()
 
     case 2:
       {
-          int interval = 0;
-          prevCheckTime = micros();
+        int interval = 0;
+        prevCheckTime = micros();
 
-          while (command == 2)
+        while (command == 2)
+        {
+          currTime = micros();
+          interval = currTime - prevCheckTime;
+
+          if ( interval >= sample_period)
           {
-            currTime = micros();
-            interval = currTime - prevCheckTime;
+            prevCheckTime = currTime;
 
-            if ( interval >= sample_period)
-            {
-              prevCheckTime = currTime;
+            Serial.printf("Intervalo atual: %i\n", interval);
 
-              Serial.printf("Intervalo atual: %i\n", interval);
+            yield();
 
-              yield();
-
-              sensor_read();
-              sensor_send_data_continuous();
-              mqtt.loop();
-            }
+            sensor_read();
+            sensor_send_data_continuous();
+            mqtt.loop();
           }
+        }
 
         break;
       }
@@ -246,7 +257,10 @@ void sensor_print()
 void esp_setwifi()
 {
   WiFi.mode(WIFI_STA);
-  wifiMulti.addAP(WLAN_SSID, WLAN_PASS);
+
+  for (int i = 0; i < network_number; i++){
+    wifiMulti.addAP(WLAN_SSID[i], WLAN_PASS[i]);
+  }
 
   Serial.println("Conectando à rede Wi-Fi.");
   for (int retry = 15; (retry >= 0 && wifiMulti.run() != WL_CONNECTED); retry--)
@@ -292,32 +306,37 @@ void esp_setmqtt()
 
 void esp_send_data()
 {
-  mqtt.publish(topico_status, status.c_str());
-
   String out_msg = "";
-
+  mqtt.publish(topico_saida, "AcX,AcY,AcZ,GyX,GyY,GyZ,Tmp");
+  
   for (int i = 0; i < n_captures; i++) {
     out_msg = "";
 
-    for (int j = 0; j < 7; j++)
+    for (int j = 0; j < 6; j++)
     {
-      out_msg += names[j];
+      //out_msg += names[j];
       out_msg += v_data[i][j];
+      out_msg += ",";
     }
+    out_msg += v_data[i][6];
     mqtt.publish(topico_saida, out_msg.c_str());
     Serial.println(out_msg);
   }
+  mqtt.publish(topico_saida, "fim");
 }
 
 void sensor_send_data_continuous()
 {
   String out_msg = "";
 
-  for (int j = 0; j < 7; j++)
+  for (int j = 0; j < 6; j++)
   {
-    out_msg += names[j];
+    //out_msg += names[j];
     out_msg += buffer[j];
+    out_msg += ",";
   }
+  out_msg += buffer[6];
+  
   mqtt.publish(topico_saida, out_msg.c_str());
   Serial.println(out_msg);
 }
