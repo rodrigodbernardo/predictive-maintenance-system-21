@@ -29,9 +29,6 @@ def mqttConnect(client, userdata, flags, rc):
 def mqttInput(client, userdata, msg):
     text_file = open("C:/Users/rodri/B3-C0-002.csv", "a")
     msg.payload = msg.payload.decode("utf-8")  ### <--- ATENCAO PARA DECODIFICAR EM UTF-8
-    
-    
-    
 
     if(msg.payload == 'fim'):
         print('fim')
@@ -63,3 +60,8 @@ client.connect(broker_addr, broker_port)
 
 
 client.loop_forever()
+
+while(1):
+    pump    = input('Bomba: ')
+    classe  = input('Classe: ')
+    
