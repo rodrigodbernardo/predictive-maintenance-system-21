@@ -110,7 +110,7 @@ void loop()
 
   switch (command)
   {
-    case 1:
+    case 2:
       {
         for (int packet = 0; packet < n_packets; packet++)
         {
@@ -160,7 +160,7 @@ void loop()
         break;
       }
 
-    case 2:
+    case 1:
       {
         int interval = 0;
         prevCheckTime = micros();

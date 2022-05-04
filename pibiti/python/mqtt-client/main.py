@@ -89,7 +89,7 @@ Menu principal
         command.update({'npk':int(input('Quantidade de pacotes: '))})
         command.update({'ncp':int(input('Amostras por pacote: '))})
     else:
-        n_packets  = 1
+        command['npk']  = 1
         n_captures = 1
     
     command.update({'spe':int(input('Período amostral (em us): '))})
@@ -97,12 +97,13 @@ Menu principal
     mqtt_message = '{}'.format(command)
 
     print('Publicando comando: ' + mqtt_message)
-    client.publish("/feeds/entrada",mqtt_message)
+    #client.publish("/feeds/entrada",mqtt_message)
+
 
     for pacote in range(command['npk']):
         print('Pacote ' + str(pacote))
         
-        command['cmd'] = 0
+        #command['cmd'] = 0
         mqtt_message = '{}'.format(command)
         client.publish("/feeds/entrada",mqtt_message)
         endFlag = 0
