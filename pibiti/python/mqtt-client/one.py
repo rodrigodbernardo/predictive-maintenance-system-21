@@ -2,6 +2,7 @@
 # Publica em /feeds/saida
 # Recebe de  /feeds/entrada
 
+from email import message
 import paho.mqtt.client as mqtt
 import time
 
@@ -22,12 +23,24 @@ dados_dict = eval(dados)
 def mqttConnect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
 
-    client.subscribe("/feeds/saida")
+    client.subscribe("/feeds/ESP_SCADA")
 
-    client.publish("/feeds/entrada", "{\"cmd\":1,\"npk\":1,\"ncp\":3000,\"spe\":5000}")
+    message = {}
+
+    message.update({'cmd':int(input('Digite o comando: '))})
+    message.update({'npk':int(input('Digite o numero de pacotes: '))})
+    message.update({'spe':int(input("Digite o periodo amostral (em us): "))})
+
+    #command = int(input("Digite o comando: "))
+    #packets = int(input("Digite o numero de pacotes: "))
+    #sample_period = int(input("Digite o periodo amostral (em us): "))
+    
+    #message = "{\"cmd\":{},\"npk\":{},\"spe\":{}}".format(command,packets,sample_period)
+    print(message)
+    client.publish("/feeds/SCADA_ESP", str(message))
 
 def mqttInput(client, userdata, msg):
-    text_file = open("C:/Users/rodri/B3-C0-002.csv", "a")
+    text_file = open("C:/Users/rodri/2022-05-04-B1-C0-001.csv", "a")
     msg.payload = msg.payload.decode("utf-8")  ### <--- ATENCAO PARA DECODIFICAR EM UTF-8
 
     if(msg.payload == 'fim'):
