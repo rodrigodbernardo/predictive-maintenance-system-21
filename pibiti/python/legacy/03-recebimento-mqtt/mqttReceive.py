@@ -7,7 +7,7 @@ broker_port = 1883
 def mqttConnect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
 
-    client.subscribe("pibiti-ifce/topico-teste-saida")
+    client.subscribe("topico")
 
 def mqttInput(client, userdata, msg):
     print(msg.payload)
